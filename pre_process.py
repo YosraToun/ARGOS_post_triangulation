@@ -26,7 +26,7 @@ def correct_markerless_fq_folder(
         subject_name = subject_folder.name
         print(f"\n--- Processing subject: {subject_name} ---")
 
-        folder_subject_markerbase = folder_marker_based / subject_name / "Final"
+        folder_subject_markerbase = folder_marker_based / subject_name / "labelled_data"
 
         # Check if the subject folder exists in the markerless folder
         subject_name_ml = "Sujet_0" + subject_name[-2:]
@@ -55,6 +55,13 @@ def correct_markerless_fq_file(trial: Path, ml_trial_path: Path, output_subject_
     # Read the marker-based and markerless c3d files
     c3d_mb, points_mb, fq_mb, labels_mb = load_c3d(trial)
     c3d_ml, points_ml, fq_ml, labels_ml = load_c3d(ml_trial_path)
+
+    # try:
+    #         c3d_ml, points_ml, fq_ml, labels_ml = load_c3d(ml_trial_path)
+    # except Exception as e:
+    #         print(f"❌ Skipping corrupted or unreadable file {ml_trial_path.name}: {e}")
+    #         return
+
 
     # get the frame count of the two c3d files
     nb_frames_mb = points_mb.shape[2]
@@ -102,18 +109,18 @@ def pre_processed_marker_based_folder(marker_based_folder: Path, output_folder: 
             )
             print(header_text)
 
-            raw_folder = subject_dir / "Final"
+            raw_folder = subject_dir / "labelled_data"
             preprocess_output_folder = output_folder / subject_name
 
-            # Verify that the 'Final' folder exists before proceeding
+            # Verify that the 'labelled_data' folder exists before proceeding
             if not raw_folder.exists():
-                print(f"Warning: 'Final' folder not found for {subject_name}. Skipping.\n")
+                print(f"Warning: 'labelled_data' folder not found for {subject_name}. Skipping.\n")
                 continue
 
             # Automatically ensure 'Preprocess' folder exists
             preprocess_output_folder.mkdir(parents=True, exist_ok=True)
 
-            # Find all C3D files in this subject's 'Final' folder
+            # Find all C3D files in this subject's 'labelled_data' folder
             c3d_files = list(raw_folder.glob("*.c3d"))
             total_files = len(c3d_files)
             print(f"Found {total_files} C3D files for {subject_name}\n")
@@ -208,7 +215,7 @@ def pre_processed_marker_less_folder(
             continue
         subject_name = subject_folder.name
         print(f"\n--- Processing subject: {subject_name} ---")
-        folder_subject_markerbase = folder_marker_based / subject_name / "Final"
+        folder_subject_markerbase = folder_marker_based / subject_name / "labelled_data"
 
         # Check if the subject folder exists in the markerless folder
         ml_subject_folder = folder_markerless_to_correct / subject_name

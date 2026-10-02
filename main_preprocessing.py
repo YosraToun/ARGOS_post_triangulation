@@ -8,12 +8,12 @@ from pre_process import (
 )
 
 # defintion of the folder of the data
-data_folder_raw_marker_based = Path("D:\\Users\\naaim\\NextCloud\\Projet ARGOS\\Data\\Marker-based")
-data_folder_raw_marker_less = Path(".\\data\\raw\\marker_less\\triangulation_20px")
+data_folder_raw_marker_based = Path(r"D:\Yosra\Engineering\Travail_LBMC\Projet_ARGOS\ARGOS_data\data\raw\marker_based")
+data_folder_raw_marker_less = Path(r"D:\Yosra\Engineering\Travail_LBMC\Projet_ARGOS\ARGOS_data\data\raw\marker_less\triangulation_20px")
 
 
 # pre_processed data folder
-pre_processed_data_folder = Path("data") / "pre_processed"
+pre_processed_data_folder = Path(r"D:\Yosra\Engineering\Travail_LBMC\Projet_ARGOS\ARGOS_data\data\pre_processed")
 pp_marker_based_folder = pre_processed_data_folder / "marker_based"
 pp_marker_less_folder = pre_processed_data_folder / "marker_less"
 
