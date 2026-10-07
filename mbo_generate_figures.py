@@ -37,10 +37,16 @@ def get_csv_dict(subject_folder):
                 if col in NON_ANGLE_VARIABLES:
                     df = df.drop(columns=[col])
 
-            # Convert only numeric angle variables
-            for col in df.columns:
+            # # Convert only numeric angle variables
+            # for col in df.columns:
+            #     if np.issubdtype(df[col].dtype, np.number) and col not in NON_ANGLE_VARIABLES:
+            #         df[col] = np.rad2deg(df[col])
+            
+            # Convert only numeric angle variables (skip first 3 columns which are translations)
+            for i, col in enumerate(df.columns):
                 if np.issubdtype(df[col].dtype, np.number) and col not in NON_ANGLE_VARIABLES:
-                    df[col] = np.rad2deg(df[col])
+                    if i >= 3:  # Only convert columns from index 3 onwards (angles)
+                        df[col] = np.rad2deg(df[col])
 
             csv_files[csv_path.name] = df
 
@@ -135,7 +141,11 @@ def generate_task_figure(subject_name, task_name, aligned_data):
 
         ax.set_title(var)
         ax.set_xlabel("Frame Index")
-        ax.set_ylabel("Angle (deg)")
+        # Assign Translation (mm) to the first 3 columns, Angle (deg) to the rest
+        if idx < 3:
+            ax.set_ylabel("Translation (mm)")
+        else:
+            ax.set_ylabel("Angle (deg)")
         ax.grid(True, alpha=0.3)
 
     # remove unused axes
