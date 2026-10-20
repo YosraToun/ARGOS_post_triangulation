@@ -41,7 +41,7 @@ def visualize(npy_file):
         tracked_markers=PyoMarkers(
             data=markers,
             channels=markerNames,
-            show_labels=False,
+            show_labels=True,
         ),
     )
 
@@ -59,3 +59,4 @@ if __name__ == "__main__":
 
     if npy_file:
         visualize(npy_file)
+        input("Visualization running. Press [Enter] in the terminal to close the window!")

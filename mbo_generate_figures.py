@@ -223,9 +223,9 @@ for subject in folder_MB.iterdir():
         print(f"   Detected freq ratio   = {ratio:.2f}")
 
         aligned_data = {
-            "Markerless_Synthpose": df_ml_Synthpose,
             "MarkerBased": df_mb,
-            "Markerless_SynthRTM": df_ml_SynthRTM,
+           "Markerless_SynthRTM": df_ml_SynthRTM,
+           "Markerless_Synthpose": df_ml_Synthpose,
         }
 
         # -------------------------
