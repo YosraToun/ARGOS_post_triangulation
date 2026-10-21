@@ -46,7 +46,7 @@ def visualize(npy_file):
     )
 
     viz.rerun()
-
+    input("Press Enter to close the viewer and exit...")
 
 if __name__ == "__main__":
 
