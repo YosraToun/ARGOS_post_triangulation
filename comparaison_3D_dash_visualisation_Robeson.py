@@ -30,6 +30,9 @@ POINT_ORDER = [
     "HM5",
 ]
 
+# Label of the extra bar summarising all selected landmarks
+SUMMARY_LABEL = "ALL"
+
 
 # ============================================================
 # SHARED FILTER
@@ -98,7 +101,7 @@ def plot_error_percentages(
     # Aggregate and Compute Percentages per Point and Model
     # --------------------------------------------------------
 
-    agg_df = (
+    per_point_df = (
         df_plot
         .group_by(["point_short", "model"])
         .agg(
@@ -112,30 +115,38 @@ def plot_error_percentages(
             pl.col(col_pz).mean().fill_null(0).alias("p_z"),
             pl.col(col_uz).mean().fill_null(0).alias("u_z"),
         )
+    )
+
+    # Extra "ALL" bar: mean over the selected landmarks (equal weight per landmark), per model
+    value_cols = ["b_x", "p_x", "u_x", "b_y", "p_y", "u_y", "b_z", "p_z", "u_z"]
+    summary_df = (
+        per_point_df
+        .group_by("model")
+        .agg([pl.col(c).mean() for c in value_cols])
+        .with_columns(pl.lit(SUMMARY_LABEL).alias("point_short"))
+        .select(per_point_df.columns)
+    )
+
+    agg_df = (
+        pl.concat([per_point_df, summary_df])
         .with_columns([
-            (pl.col("b_x") + pl.col("p_x") + pl.col("u_x")).alias("total_x"),
-            (pl.col("b_y") + pl.col("p_y") + pl.col("u_y")).alias("total_y"),
-            (pl.col("b_z") + pl.col("p_z") + pl.col("u_z")).alias("total_z"),
+            (pl.col(f"b_{a}") + pl.col(f"p_{a}") + pl.col(f"u_{a}")).alias(f"total_{a}")
+            for a in ("x", "y", "z")
         ])
         .with_columns([
-            pl.when(pl.col("total_x") > 0).then(pl.col("b_x") / pl.col("total_x") * 100).otherwise(0).alias("pct_b_x"),
-            pl.when(pl.col("total_x") > 0).then(pl.col("p_x") / pl.col("total_x") * 100).otherwise(0).alias("pct_p_x"),
-            pl.when(pl.col("total_x") > 0).then(pl.col("u_x") / pl.col("total_x") * 100).otherwise(0).alias("pct_u_x"),
-
-            pl.when(pl.col("total_y") > 0).then(pl.col("b_y") / pl.col("total_y") * 100).otherwise(0).alias("pct_b_y"),
-            pl.when(pl.col("total_y") > 0).then(pl.col("p_y") / pl.col("total_y") * 100).otherwise(0).alias("pct_p_y"),
-            pl.when(pl.col("total_y") > 0).then(pl.col("u_y") / pl.col("total_y") * 100).otherwise(0).alias("pct_u_y"),
-
-            pl.when(pl.col("total_z") > 0).then(pl.col("b_z") / pl.col("total_z") * 100).otherwise(0).alias("pct_b_z"),
-            pl.when(pl.col("total_z") > 0).then(pl.col("p_z") / pl.col("total_z") * 100).otherwise(0).alias("pct_p_z"),
-            pl.when(pl.col("total_z") > 0).then(pl.col("u_z") / pl.col("total_z") * 100).otherwise(0).alias("pct_u_z"),
+            pl.when(pl.col(f"total_{a}") > 0)
+            .then(pl.col(f"{c}_{a}") / pl.col(f"total_{a}") * 100)
+            .otherwise(0)
+            .alias(f"pct_{c}_{a}")
+            for a in ("x", "y", "z")
+            for c in ("b", "p", "u")
         ])
     )
 
-    # Sort according to POINT_ORDER
+    # Sort according to POINT_ORDER, with the summary bar last
     mapping_df = pl.DataFrame({
-        "point_short": POINT_ORDER,
-        "sort_idx": range(len(POINT_ORDER))
+        "point_short": POINT_ORDER + [SUMMARY_LABEL],
+        "sort_idx": range(len(POINT_ORDER) + 1),
     })
 
     agg_df = (
@@ -150,8 +161,9 @@ def plot_error_percentages(
 
     current_points = agg_df.get_column("point_short").unique().to_list()
     # Same category order on every subplot (follows POINT_ORDER)
-    ordered_points = [p for p in POINT_ORDER if p in current_points]
-    is_compact = len(ordered_points) <= 3
+    landmark_points = [p for p in POINT_ORDER if p in current_points]
+    ordered_points = landmark_points + [SUMMARY_LABEL]  # summary bar always last
+    is_compact = len(landmark_points) <= 3
 
     titles = [
         "X Axis",
