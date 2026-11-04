@@ -7,14 +7,8 @@ from plotly.subplots import make_subplots
 from dash import Dash, dcc, html, Input, Output
 
 # ============================================================
-# LOAD DATA
+# CONSTANTS & POINT ORDER
 # ============================================================
-
-path_robeson = Path(r"./data/pre_processed/Robeson_3Dtrajectories_errors_ALL_trial.parquet")
-path_willmott = Path(r"./data/pre_processed/Willmott_3Dtrajectories_errors_ALL_trial.parquet")
-
-df_robeson = pl.read_parquet(path_robeson)
-df_willmott = pl.read_parquet(path_willmott)
 
 POINT_ORDER = [
     "C7",
@@ -32,22 +26,21 @@ POINT_ORDER = [
     "HM5",
 ]
 
-
 # ============================================================
-# SHARED FILTER
+# PLOT FUNCTIONS FOR BOTH DECOMPOSITIONS
 # ============================================================
 
-def filter_data(
+def plot_robeson_quantiles(
     df: pl.DataFrame,
-    tasks: list[str] | None = None,
+    subjects: list[str] | None = None,
     points: list[str] | None = None,
     models: list[str] | None = None,
     coordinate_system: str = "anatomical",
-) -> pl.DataFrame:
+):
     df_plot = df.filter(pl.col("coordinate_system") == coordinate_system)
 
-    if tasks is not None:
-        df_plot = df_plot.filter(pl.col("task").is_in(tasks))
+    if subjects is not None:
+        df_plot = df_plot.filter(pl.col("subject").is_in(subjects))
 
     if points is not None:
         df_plot = df_plot.filter(pl.col("point_short").is_in(points))
@@ -55,26 +48,16 @@ def filter_data(
     if models is not None:
         df_plot = df_plot.filter(pl.col("model").is_in(models))
 
-    return df_plot
-
-
-# ============================================================
-# PLOT FUNCTION: ROBESON QUANTILE BOXPLOTS
-# ============================================================
-
-def plot_robeson_quantiles(
-    df: pl.DataFrame,
-    tasks: list[str] | None = None,
-    points: list[str] | None = None,
-    models: list[str] | None = None,
-    coordinate_system: str = "anatomical",
-):
-    df_plot = filter_data(df, tasks, points, models, coordinate_system)
-
+    # Compute Total MAE per axis & 3D Norms across components
     df_plot = df_plot.with_columns([
         (pl.col("MAE_b_x") + pl.col("MAE_p_x") + pl.col("MAE_u_x")).alias("MAE_total_x"),
         (pl.col("MAE_b_y") + pl.col("MAE_p_y") + pl.col("MAE_u_y")).alias("MAE_total_y"),
         (pl.col("MAE_b_z") + pl.col("MAE_p_z") + pl.col("MAE_u_z")).alias("MAE_total_z"),
+    ]).with_columns([
+        (pl.col("MAE_b_x")**2 + pl.col("MAE_b_y")**2 + pl.col("MAE_b_z")**2).sqrt().alias("MAE_b_norm_3d"),
+        (pl.col("MAE_p_x")**2 + pl.col("MAE_p_y")**2 + pl.col("MAE_p_z")**2).sqrt().alias("MAE_p_norm_3d"),
+        (pl.col("MAE_u_x")**2 + pl.col("MAE_u_y")**2 + pl.col("MAE_u_z")**2).sqrt().alias("MAE_u_norm_3d"),
+        (pl.col("MAE_total_x")**2 + pl.col("MAE_total_y")**2 + pl.col("MAE_total_z")**2).sqrt().alias("MAE_total_norm_3d"),
     ])
 
     robeson_columns = [
@@ -82,11 +65,12 @@ def plot_robeson_quantiles(
         "MAE_b_y", "MAE_p_y", "MAE_u_y",
         "MAE_b_z", "MAE_p_z", "MAE_u_z",
         "MAE_total_x", "MAE_total_y", "MAE_total_z",
+        "MAE_b_norm_3d", "MAE_p_norm_3d", "MAE_u_norm_3d", "MAE_total_norm_3d",
     ]
 
     df_unpivoted = (
         df_plot.unpivot(
-            index=["point_short", "model", "task"],
+            index=["point_short", "model", "subject"],
             on=robeson_columns,
             variable_name="metric",
             value_name="error",
@@ -102,6 +86,7 @@ def plot_robeson_quantiles(
             pl.when(pl.col("metric").str.ends_with("_x")).then(pl.lit("x"))
               .when(pl.col("metric").str.ends_with("_y")).then(pl.lit("y"))
               .when(pl.col("metric").str.ends_with("_z")).then(pl.lit("z"))
+              .when(pl.col("metric").str.ends_with("_norm_3d")).then(pl.lit("norm_3d"))
               .otherwise(pl.lit("unknown"))
               .alias("axis"),
         ])
@@ -121,17 +106,17 @@ def plot_robeson_quantiles(
         .sort(["point_short", "model", "axis", "component"])
     )
 
-    titles = ["X Axis ", "Y Axis ", "Z Axis "]
-    fig = make_subplots(rows=3, cols=1, subplot_titles=titles, vertical_spacing=0.1)
+    titles = ["X Axis", "Y Axis", "Z Axis", "3D Norm"]
+    fig = make_subplots(rows=4, cols=1, subplot_titles=titles, vertical_spacing=0.08)
 
-    positions = {"x": 1, "y": 2, "z": 3}
-
+    positions = {"x": 1, "y": 2, "z": 3, "norm_3d": 4}
     component_colors = {
-        "b": "#d62728",     # Systematic Bias (Red)
-        "p": "#ff7f0e",     # Proportional Error (Orange)
-        "u": "#1f77b4",     # Unsystematic Error (Blue)
-        "total": "#2ca02c", # Total MAE (Green)
+        "b": "#d62728",     # Systematic Bias
+        "p": "#ff7f0e",     # Proportional Error
+        "u": "#1f77b4",     # Unsystematic Error
+        "total": "#2ca02c", # Total MAE
     }
+    model_dash = {"SynthPose": "solid", "RTMPose": "dash"}
 
     component_labels = {
         "b": "Systematic Bias",
@@ -139,17 +124,12 @@ def plot_robeson_quantiles(
         "u": "Unsystematic Error",
         "total": "Total MAE",
     }
-
-    model_dash = {"SynthPose": "solid", "RTMPose": "dash"}
-
     for key, label in component_labels.items():
         fig.add_trace(
             go.Scatter(
-                x=[None], y=[None],
-                mode="markers",
+                x=[None], y=[None], mode="markers",
                 marker=dict(size=12, color=component_colors[key]),
-                name=label,
-                legendgroup="components",
+                name=label, legendgroup="components",
                 legendgrouptitle_text="<b>Error Components</b>" if key == "b" else None,
                 showlegend=True
             ),
@@ -159,11 +139,9 @@ def plot_robeson_quantiles(
     for model_name, dash_style in model_dash.items():
         fig.add_trace(
             go.Scatter(
-                x=[None], y=[None],
-                mode="lines",
+                x=[None], y=[None], mode="lines",
                 line=dict(color="gray", width=2.5, dash=dash_style),
-                name=model_name,
-                legendgroup="models",
+                name=model_name, legendgroup="models",
                 legendgrouptitle_text="<b>Models</b>" if model_name == "SynthPose" else None,
                 showlegend=True
             ),
@@ -199,53 +177,57 @@ def plot_robeson_quantiles(
                     fig.add_trace(go.Scatter(x=[x - 0.022, x + 0.022], y=[median, median], mode="lines", line=dict(color=color, width=2, dash=dash_style), showlegend=False, hoverinfo="skip"), row=row_idx, col=1)
 
     tickvals = list(range(len(available_points)))
-
-    for row_idx in (1, 2, 3):
+    for row_idx in (1, 2, 3, 4):
         fig.update_xaxes(
-            title_text="Anatomical Landmarks",
-            tickmode="array",
-            tickvals=tickvals,
-            ticktext=available_points,
-            tickangle=45,
-            row=row_idx, col=1,
+            title_text="Anatomical Landmarks" if row_idx == 4 else "",
+            tickmode="array", tickvals=tickvals, ticktext=available_points,
+            tickangle=45, row=row_idx, col=1,
         )
-        fig.update_yaxes(title_text="MAE (mm)", row=row_idx, col=1)
+        fig.update_yaxes(title_text="Error (mm)" if row_idx != 4 else " 3D Norm (mm)", row=row_idx, col=1)
 
     fig.update_layout(
-        height=1300,
-        template="plotly_white",
-        hovermode="closest",
+        title=dict(text="<b>Robeson Error Decomposition — Pooled trials Per subject</b>", font=dict(size=22), x=0.5, xanchor="center", yanchor="top"),
+        height=1650, template="plotly_white", hovermode="closest",
         legend=dict(orientation="v", yanchor="top", y=1.0, xanchor="left", x=1.02, font=dict(size=14), tracegroupgap=25),
         margin=dict(l=60, r=220, t=100, b=100),
     )
-
     return fig
 
 
-# ============================================================
-# PLOT FUNCTION: WILLMOTT QUANTILE BOXPLOTS
-# ============================================================
-
 def plot_willmott_quantiles(
     df: pl.DataFrame,
-    tasks: list[str] | None = None,
+    subjects: list[str] | None = None,
     points: list[str] | None = None,
     models: list[str] | None = None,
     coordinate_system: str = "anatomical",
 ):
-    df_plot = filter_data(df, tasks, points, models, coordinate_system)
+    df_plot = df.filter(pl.col("coordinate_system") == coordinate_system)
 
-    cols = df_plot.columns
+    if subjects is not None:
+        df_plot = df_plot.filter(pl.col("subject").is_in(subjects))
+
+    if points is not None:
+        df_plot = df_plot.filter(pl.col("point_short").is_in(points))
+
+    if models is not None:
+        df_plot = df_plot.filter(pl.col("model").is_in(models))
+
+    df_plot = df_plot.with_columns([
+        (pl.col("RMSE_x")**2 + pl.col("RMSE_y")**2 + pl.col("RMSE_z")**2).sqrt().alias("RMSE_norm_3d"),
+        (pl.col("RMSE_s_x")**2 + pl.col("RMSE_s_y")**2 + pl.col("RMSE_s_z")**2).sqrt().alias("RMSE_s_norm_3d"),
+        (pl.col("RMSE_u_x")**2 + pl.col("RMSE_u_y")**2 + pl.col("RMSE_u_z")**2).sqrt().alias("RMSE_u_norm_3d"),
+    ])
+
     willmott_columns = [
         "RMSE_x", "RMSE_s_x", "RMSE_u_x",
         "RMSE_y", "RMSE_s_y", "RMSE_u_y",
         "RMSE_z", "RMSE_s_z", "RMSE_u_z",
+        "RMSE_norm_3d", "RMSE_s_norm_3d", "RMSE_u_norm_3d",
     ]
-    willmott_columns = [c for c in willmott_columns if c in cols]
 
     df_unpivoted = (
         df_plot.unpivot(
-            index=["point_short", "model", "task"],
+            index=["point_short", "model", "subject"],
             on=willmott_columns,
             variable_name="metric",
             value_name="error",
@@ -254,12 +236,13 @@ def plot_willmott_quantiles(
         .with_columns([
             pl.when(pl.col("metric").str.starts_with("RMSE_s_")).then(pl.lit("s"))
               .when(pl.col("metric").str.starts_with("RMSE_u_")).then(pl.lit("u"))
-              .when(pl.col("metric").is_in(["RMSE_x", "RMSE_y", "RMSE_z"])).then(pl.lit("rmse"))
+              .when(pl.col("metric").str.starts_with("RMSE_") & ~pl.col("metric").str.contains("_s_") & ~pl.col("metric").str.contains("_u_")).then(pl.lit("total"))
               .otherwise(pl.lit("unknown"))
               .alias("component"),
             pl.when(pl.col("metric").str.ends_with("_x")).then(pl.lit("x"))
               .when(pl.col("metric").str.ends_with("_y")).then(pl.lit("y"))
               .when(pl.col("metric").str.ends_with("_z")).then(pl.lit("z"))
+              .when(pl.col("metric").str.ends_with("_norm_3d")).then(pl.lit("norm_3d"))
               .otherwise(pl.lit("unknown"))
               .alias("axis"),
         ])
@@ -279,34 +262,29 @@ def plot_willmott_quantiles(
         .sort(["point_short", "model", "axis", "component"])
     )
 
-    titles = ["X Axis ", "Y Axis ", "Z Axis "]
-    fig = make_subplots(rows=3, cols=1, subplot_titles=titles, vertical_spacing=0.1)
+    titles = ["X Axis", "Y Axis", "Z Axis", "3D Norm"]
+    fig = make_subplots(rows=4, cols=1, subplot_titles=titles, vertical_spacing=0.08)
 
-    positions = {"x": 1, "y": 2, "z": 3}
-
+    positions = {"x": 1, "y": 2, "z": 3, "norm_3d": 4}
     component_colors = {
-        "rmse": "#2ca02c",  # Total RMSE (Green)
-        "s": "#d62728",     # Systematic RMSE_s (Red)
-        "u": "#1f77b4",     # Unsystematic RMSE_u (Blue)
+        "s": "#d62728",     # Systematic RMSE
+        "u": "#1f77b4",     # Unsystematic RMSE
+        "total": "#2ca02c", # Total RMSE
     }
-
-    component_labels = {
-        "rmse": "Total RMSE",
-        "s": "Systematic RMSE ",
-        "u": "Unsystematic RMSE ",
-    }
-
     model_dash = {"SynthPose": "solid", "RTMPose": "dash"}
 
+    component_labels = {
+        "s": "Systematic RMSE",
+        "u": "Unsystematic RMSE",
+        "total": "Total RMSE",
+    }
     for key, label in component_labels.items():
         fig.add_trace(
             go.Scatter(
-                x=[None], y=[None],
-                mode="markers",
+                x=[None], y=[None], mode="markers",
                 marker=dict(size=12, color=component_colors[key]),
-                name=label,
-                legendgroup="components",
-                legendgrouptitle_text="<b>Error Components</b>" if key == "rmse" else None,
+                name=label, legendgroup="components",
+                legendgrouptitle_text="<b>Error Components</b>" if key == "s" else None,
                 showlegend=True
             ),
             row=1, col=1
@@ -315,11 +293,9 @@ def plot_willmott_quantiles(
     for model_name, dash_style in model_dash.items():
         fig.add_trace(
             go.Scatter(
-                x=[None], y=[None],
-                mode="lines",
+                x=[None], y=[None], mode="lines",
                 line=dict(color="gray", width=2.5, dash=dash_style),
-                name=model_name,
-                legendgroup="models",
+                name=model_name, legendgroup="models",
                 legendgrouptitle_text="<b>Models</b>" if model_name == "SynthPose" else None,
                 showlegend=True
             ),
@@ -335,12 +311,12 @@ def plot_willmott_quantiles(
         for model_index, model in enumerate(available_models):
             model_data = axis_data.filter(pl.col("model") == model)
             dash_style = model_dash.get(model, "solid")
-            components = ["rmse", "s", "u"]
+            components = ["s", "u", "total"]
 
             for comp_index, component in enumerate(components):
                 comp_data = model_data.filter(pl.col("component") == component)
                 color = component_colors[component]
-                offset = (model_index * 3 + comp_index - 2.5) * 0.06
+                offset = (model_index * 3 + comp_index - 2.5) * 0.05
 
                 for point_index, point in enumerate(available_points):
                     q = comp_data.filter(pl.col("point_short") == point)
@@ -355,43 +331,21 @@ def plot_willmott_quantiles(
                     fig.add_trace(go.Scatter(x=[x - 0.022, x + 0.022], y=[median, median], mode="lines", line=dict(color=color, width=2, dash=dash_style), showlegend=False, hoverinfo="skip"), row=row_idx, col=1)
 
     tickvals = list(range(len(available_points)))
-
-    for row_idx in (1, 2, 3):
+    for row_idx in (1, 2, 3, 4):
         fig.update_xaxes(
-            title_text="Anatomical Landmarks",
-            tickmode="array",
-            tickvals=tickvals,
-            ticktext=available_points,
-            tickangle=45,
-            row=row_idx, col=1,
+            title_text="Anatomical Landmarks" if row_idx == 4 else "",
+            tickmode="array", tickvals=tickvals, ticktext=available_points,
+            tickangle=45, row=row_idx, col=1,
         )
-        fig.update_yaxes(title_text="RMSE (mm)", row=row_idx, col=1)
+        fig.update_yaxes(title_text="Error (mm)" if row_idx != 4 else " 3D Norm (mm)", row=row_idx, col=1)
 
     fig.update_layout(
-        height=1300,
-        template="plotly_white",
-        hovermode="closest",
+        title=dict(text="<b>Willmott Error Decomposition — Pooled trials Per subject</b>", font=dict(size=22), x=0.5, xanchor="center", yanchor="top"),
+        height=1650, template="plotly_white", hovermode="closest",
         legend=dict(orientation="v", yanchor="top", y=1.0, xanchor="left", x=1.02, font=dict(size=14), tracegroupgap=25),
         margin=dict(l=60, r=220, t=100, b=100),
     )
-
     return fig
-
-
-# ============================================================
-# VALUES AVAILABLE IN DATASETS
-# ============================================================
-
-all_tasks = sorted(list(set(df_robeson.select("task").unique().to_series().to_list() + 
-                            df_willmott.select("task").unique().to_series().to_list())))
-
-all_models = sorted(list(set(df_robeson.select("model").unique().to_series().to_list() + 
-                             df_willmott.select("model").unique().to_series().to_list())))
-
-points_robeson = set(df_robeson.get_column("point_short").unique().to_list())
-points_willmott = set(df_willmott.get_column("point_short").unique().to_list())
-common_points = points_robeson.intersection(points_willmott)
-all_points = [point for point in POINT_ORDER if point in common_points]
 
 
 # ============================================================
@@ -403,41 +357,36 @@ app = Dash(__name__)
 app.layout = html.Div(
     [
         html.H1(
-            "Task-Pooled Error Decomposition — All Subjects",
+            "3D Trajectories Error Decomposition Visualization — Pooled trials Per subject",
             style={"textAlign": "center"},
         ),
+        html.Hr(),
         html.H3("Decomposition Method"),
         dcc.Dropdown(
             id="decomposition-selector",
             options=[
-                {"label": "Robeson (MAE Quantiles: Bias, Proportional, Unsystematic, Total)", "value": "robeson"},
-                {"label": "Willmott (RMSE Quantiles: Systematic, Unsystematic, Total)", "value": "willmott"},
+                {"label": "Robeson Decomposition", "value": "Robeson"},
+                {"label": "Willmott Decomposition", "value": "Willmott"},
             ],
-            value="robeson",
+            value="Robeson",
             clearable=False,
         ),
         html.Hr(),
-        html.H3("Tasks"),
-        dcc.Checklist(
-            id="task-selector",
-            options=[{"label": task, "value": task} for task in all_tasks],
-            value=all_tasks,
-            inline=True,
+        html.H3("Subjects"),
+        dcc.Dropdown(
+            id="subject-selector",
+            multi=True,
         ),
         html.Hr(),
         html.H3("Points"),
         dcc.Dropdown(
             id="point-selector",
-            options=[{"label": point, "value": point} for point in all_points],
-            value=all_points,
             multi=True,
         ),
         html.Hr(),
         html.H3("Models"),
         dcc.Checklist(
             id="model-selector",
-            options=[{"label": model, "value": model} for model in all_models],
-            value=all_models,
             inline=True,
         ),
         html.Hr(),
@@ -445,7 +394,7 @@ app.layout = html.Div(
             type="circle",
             children=dcc.Graph(
                 id="error-graph",
-                style={"height": "1350px"},
+                style={"height": "1700px"},
             ),
         ),
     ],
@@ -454,41 +403,84 @@ app.layout = html.Div(
 
 
 # ============================================================
-# CALLBACK
+# CALLBACKS TO UPDATE DROPDOWNS DYNAMICALLY BASED ON DATASET
+# ============================================================
+
+@app.callback(
+    Output("subject-selector", "options"),
+    Output("subject-selector", "value"),
+    Output("point-selector", "options"),
+    Output("point-selector", "value"),
+    Output("model-selector", "options"),
+    Output("model-selector", "value"),
+    Input("decomposition-selector", "value"),
+)
+def update_dropdowns(decomposition_method):
+    if decomposition_method == "Robeson":
+        path = Path(r".\data\pre_processed\Robeson_3Dtrajectories_errors_per_subject.parquet")
+    else:
+        path = Path(r".\data\pre_processed\Willmott_3Dtrajectories_errors_per_subject.parquet")
+
+    df_local = pl.read_parquet(path)
+
+    subjects = df_local.select("subject").unique().sort("subject").to_series().to_list()
+    models = df_local.select("model").unique().sort("model").to_series().to_list()
+    
+    points_in_data = set(df_local.get_column("point_short").unique().to_list())
+    points = [point for point in POINT_ORDER if point in points_in_data]
+
+    subject_options = [{"label": s, "value": s} for s in subjects]
+    point_options = [{"label": p, "value": p} for p in points]
+    model_options = [{"label": m, "value": m} for m in models]
+
+    return (
+        subject_options, subjects,
+        point_options, points,
+        model_options, models
+    )
+
+
+# ============================================================
+# MAIN CALLBACK FOR GRAPH GENERATION
 # ============================================================
 
 @app.callback(
     Output("error-graph", "figure"),
-    Output("error-graph", "style"),
     Input("decomposition-selector", "value"),
-    Input("task-selector", "value"),
+    Input("subject-selector", "value"),
     Input("point-selector", "value"),
     Input("model-selector", "value"),
 )
 def update_graph(
-    selected_decomposition,
-    selected_tasks,
+    decomposition_method,
+    selected_subjects,
     selected_points,
     selected_models,
 ):
-    if selected_decomposition == "robeson":
-        fig = plot_robeson_quantiles(
-            df=df_robeson,
-            tasks=selected_tasks,
+    if not selected_subjects or not selected_points or not selected_models:
+        # Return empty figure if selections are empty
+        return go.Figure()
+
+    if decomposition_method == "Robeson":
+        path = Path(r".\data\pre_processed\Robeson_3Dtrajectories_errors_per_subject.parquet")
+        df_local = pl.read_parquet(path)
+        return plot_robeson_quantiles(
+            df=df_local,
+            subjects=selected_subjects,
             points=selected_points,
             models=selected_models,
             coordinate_system="anatomical",
         )
     else:
-        fig = plot_willmott_quantiles(
-            df=df_willmott,
-            tasks=selected_tasks,
+        path = Path(r".\data\pre_processed\Willmott_3Dtrajectories_errors_per_subject.parquet")
+        df_local = pl.read_parquet(path)
+        return plot_willmott_quantiles(
+            df=df_local,
+            subjects=selected_subjects,
             points=selected_points,
             models=selected_models,
             coordinate_system="anatomical",
         )
-
-    return fig, {"height": f"{fig.layout.height + 50}px"}
 
 
 # ============================================================

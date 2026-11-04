@@ -64,6 +64,14 @@ def plot_robeson_barplots(
         .agg([pl.col(c).mean() for c in agg_cols])
     )
 
+    # Calculate 3D Norms
+    df_plot = df_plot.with_columns([
+        (pl.col("MAE_b_x").pow(2) + pl.col("MAE_b_y").pow(2) + pl.col("MAE_b_z").pow(2)).sqrt().alias("MAE_b_norm"),
+        (pl.col("MAE_p_x").pow(2) + pl.col("MAE_p_y").pow(2) + pl.col("MAE_p_z").pow(2)).sqrt().alias("MAE_p_norm"),
+        (pl.col("MAE_u_x").pow(2) + pl.col("MAE_u_y").pow(2) + pl.col("MAE_u_z").pow(2)).sqrt().alias("MAE_u_norm"),
+        (pl.col("MAE_total_x").pow(2) + pl.col("MAE_total_y").pow(2) + pl.col("MAE_total_z").pow(2)).sqrt().alias("MAE_total_norm"),
+    ])
+
     mapping_df = pl.DataFrame({
         "point_short": POINT_ORDER,
         "sort_idx": range(len(POINT_ORDER))
@@ -75,10 +83,10 @@ def plot_robeson_barplots(
         .sort(["sort_idx", "model"])
     )
 
-    titles = ["X Axis", "Y Axis", "Z Axis"]
-    fig = make_subplots(rows=3, cols=1, subplot_titles=titles, vertical_spacing=0.12)
+    titles = ["X Axis", "Y Axis", "Z Axis", "3D Norm"]
+    fig = make_subplots(rows=4, cols=1, subplot_titles=titles, vertical_spacing=0.08)
 
-    axes_config = [("x", 1, 1), ("y", 2, 1), ("z", 3, 1)]
+    axes_config = [("x", 1, 1), ("y", 2, 1), ("z", 3, 1), ("norm", 4, 1)]
 
     component_colors = {
         "b": "#d62728",     # Systematic Bias (Red)
@@ -141,7 +149,11 @@ def plot_robeson_barplots(
             pattern = model_patterns.get(model, "")
 
             for comp_key in ["total", "b", "p", "u"]:
-                col_name = f"MAE_total_{axis_name}" if comp_key == "total" else f"MAE_{comp_key}_{axis_name}"
+                if axis_name == "norm":
+                    col_name = f"MAE_total_norm" if comp_key == "total" else f"MAE_{comp_key}_norm"
+                else:
+                    col_name = f"MAE_total_{axis_name}" if comp_key == "total" else f"MAE_{comp_key}_{axis_name}"
+
                 if col_name not in model_df.columns:
                     continue
 
@@ -166,19 +178,26 @@ def plot_robeson_barplots(
                 )
 
     fig.update_layout(
+        title=dict(
+            text="<b>Robeson Error Decomposition — Pooled Subjects & Trials</b>",
+            x=0.5,
+            xanchor="center",
+            font=dict(size=18)
+        ),
         barmode="group",
         bargroupgap=0.15,
-        height=1200,
+        height=1700,
         template="plotly_white",
         hovermode="closest",
         legend=dict(orientation="v", yanchor="top", y=1.0, xanchor="left", x=1.02, font=dict(size=14), tracegroupgap=25),
-        margin=dict(l=60, r=240, t=100, b=100),
+        margin=dict(l=60, r=240, t=120, b=100),
     )
 
     fig.update_xaxes(type="category", categoryorder="array", categoryarray=ordered_points)
 
     for axis_name, row_idx, col_idx in axes_config:
-        fig.update_yaxes(title_text="MAE (mm)", row=row_idx, col=col_idx)
+        y_title = " 3D Norm (mm)" if axis_name == "norm" else "Error (mm)"
+        fig.update_yaxes(title_text=y_title, row=row_idx, col=col_idx)
         fig.update_xaxes(title_text="Anatomical Landmarks", tickangle=45, row=row_idx, col=col_idx)
 
     return fig
@@ -209,6 +228,21 @@ def plot_willmott_barplots(
         .agg([pl.col(c).mean() for c in agg_cols])
     )
 
+    # Calculate 3D Norms
+    cols = df_plot.columns
+    if "RMSE_x" in cols and "RMSE_y" in cols and "RMSE_z" in cols:
+        df_plot = df_plot.with_columns([
+            (pl.col("RMSE_x").pow(2) + pl.col("RMSE_y").pow(2) + pl.col("RMSE_z").pow(2)).sqrt().alias("RMSE_norm")
+        ])
+    if "RMSE_s_x" in cols and "RMSE_s_y" in cols and "RMSE_s_z" in cols:
+        df_plot = df_plot.with_columns([
+            (pl.col("RMSE_s_x").pow(2) + pl.col("RMSE_s_y").pow(2) + pl.col("RMSE_s_z").pow(2)).sqrt().alias("RMSE_s_norm")
+        ])
+    if "RMSE_u_x" in cols and "RMSE_u_y" in cols and "RMSE_u_z" in cols:
+        df_plot = df_plot.with_columns([
+            (pl.col("RMSE_u_x").pow(2) + pl.col("RMSE_u_y").pow(2) + pl.col("RMSE_u_z").pow(2)).sqrt().alias("RMSE_u_norm")
+        ])
+
     mapping_df = pl.DataFrame({
         "point_short": POINT_ORDER,
         "sort_idx": range(len(POINT_ORDER))
@@ -220,10 +254,10 @@ def plot_willmott_barplots(
         .sort(["sort_idx", "model"])
     )
 
-    titles = ["X Axis", "Y Axis", "Z Axis"]
-    fig = make_subplots(rows=3, cols=1, subplot_titles=titles, vertical_spacing=0.12)
+    titles = ["X Axis", "Y Axis", "Z Axis", "3D Norm"]
+    fig = make_subplots(rows=4, cols=1, subplot_titles=titles, vertical_spacing=0.08)
 
-    axes_config = [("x", 1, 1), ("y", 2, 1), ("z", 3, 1)]
+    axes_config = [("x", 1, 1), ("y", 2, 1), ("z", 3, 1), ("norm", 4, 1)]
 
     component_colors = {
         "rmse": "#2ca02c",  # Total RMSE (Green)
@@ -284,7 +318,11 @@ def plot_willmott_barplots(
             pattern = model_patterns.get(model, "")
 
             for comp_key in ["rmse", "s", "u"]:
-                col_name = f"RMSE_{axis_name}" if comp_key == "rmse" else f"RMSE_{comp_key}_{axis_name}"
+                if axis_name == "norm":
+                    col_name = f"RMSE_norm" if comp_key == "rmse" else f"RMSE_{comp_key}_norm"
+                else:
+                    col_name = f"RMSE_{axis_name}" if comp_key == "rmse" else f"RMSE_{comp_key}_{axis_name}"
+
                 if col_name not in model_df.columns:
                     continue
 
@@ -309,19 +347,26 @@ def plot_willmott_barplots(
                 )
 
     fig.update_layout(
+        title=dict(
+            text="<b>Willmott Error Decomposition — Pooled Subjects & Trials </b>",
+            x=0.5,
+            xanchor="center",
+            font=dict(size=18)
+        ),
         barmode="group",
         bargroupgap=0.15,
-        height=1200,
+        height=1700,
         template="plotly_white",
         hovermode="closest",
         legend=dict(orientation="v", yanchor="top", y=1.0, xanchor="left", x=1.02, font=dict(size=14), tracegroupgap=25),
-        margin=dict(l=60, r=240, t=100, b=100),
+        margin=dict(l=60, r=240, t=120, b=100),
     )
 
     fig.update_xaxes(type="category", categoryorder="array", categoryarray=ordered_points)
 
     for axis_name, row_idx, col_idx in axes_config:
-        fig.update_yaxes(title_text="RMSE (mm)", row=row_idx, col=col_idx)
+        y_title = "3D Norm (mm)" if axis_name == "norm" else "Error (mm)"
+        fig.update_yaxes(title_text=y_title, row=row_idx, col=col_idx)
         fig.update_xaxes(title_text="Anatomical Landmarks", tickangle=45, row=row_idx, col=col_idx)
 
     return fig
@@ -349,15 +394,15 @@ app = Dash(__name__)
 app.layout = html.Div(
     [
         html.H1(
-            "3D Trajectories Error Decomposition — All Subjects & Trials",
+            "3D Trajectories Error Decomposition — Pooled Subjects & Trials",
             style={"textAlign": "center"},
         ),
         html.H3("Decomposition Method"),
         dcc.Dropdown(
             id="decomposition-selector",
             options=[
-                {"label": "Robeson (MAE Decomposition: Bias, Proportional, Unsystematic)", "value": "robeson"},
-                {"label": "Willmott (RMSE Decomposition: Systematic, Unsystematic)", "value": "willmott"},
+                {"label": "Robeson Decomposition", "value": "robeson"},
+                {"label": "Willmott Decomposition", "value": "willmott"},
             ],
             value="robeson",
             clearable=False,
@@ -383,7 +428,7 @@ app.layout = html.Div(
             type="circle",
             children=dcc.Graph(
                 id="error-graph",
-                style={"height": "1250px"},
+                style={"height": "1750px"},
             ),
         ),
     ],

@@ -258,7 +258,7 @@ def main():
     print("Computing task-pooled Robeson regression and MAE decomposition across all subjects...")
     df_errors = build_task_pooled_dataframe(storage, dict_frame_to_use)
 
-    output_file = path_data / "Robeson_3Dtrajectories_errors_ALL_trial.parquet"
+    output_file = path_data / "Robeson_3Dtrajectories_errors_per_trial.parquet"
     df_errors.write_parquet(output_file)
     print(f"Task-pooled Robeson errors saved to: {output_file}")
     print(df_errors)
