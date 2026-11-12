@@ -17,6 +17,7 @@ The workflow is organized into a few steps:
 - `main_preprocessing.py`: preprocesses raw marker-based and markerless data, corrects markerless sampling frequency, filters signals, and creates fused markerless datasets.
 - `main_mbo.py`: builds personalized models and runs inverse kinematics for marker-based, SynthPose, and SynthRTMPose data.
 - `create_model_upperlimb.py` : create the biomechanical models used by the kinematics pipeline (three model available : Marker-based, SynthPose, and SynthRTMPose).
+- `kinematics_to_all_figure.py`: prepares kinematics error data and generates summary tables and boxplots from the `Kinematics/` results.
 - `mbo_generate_figures.py`: generates static comparison plots from the kinematics outputs for all subjects and models.
 - `mbo_visualization_rerun.py` : generates a 3D visualisation of the results of the inverse kinematics for a given subject and model by selecting the npy files.
 - `kinematics.py`: solves inverse kinematics for a C3D trial and exports joint angles as CSV, with optional `.npy` optimization metadata.
@@ -97,6 +98,19 @@ python comparaison_3D_dash_visualisation.py
 ```
 
 The app loads `data/pre_processed/absolute_position_errors.parquet` and provides filters for subject, task, point, and model.
+
+
+### 6. Generate kinematics error figures
+
+Run:
+
+```bash
+python kinematics_to_all_figure.py
+```
+
+The script reads kinematics from `Kinematics/`, using `Marker_based` as the reference and comparing `Synthpose`, `SynthRTMPose`, and `Rtmpose`. Its current configuration processes the strong side only, using the subject laterality mapping defined in the script, and excludes 10 frames at both ends of the `16-comb-hair` task. The input folder and these analysis settings can be changed near the top of `kinematics_to_all_figure.py`.
+
+The script writes the strong-side error data to `figures/kinematic_errors_strong_side.parquet` and an Excel summary to `figures/kinematic_errors_summary.xlsx`. It then generates PNG boxplots under `figures/error_deg/boxplot/`: per-subject and per-task plots are grouped into subject subfolders, with additional all-subject plots grouped by task in `task/` and by degree of freedom in `dof/`.
 
 
 ## Outputs

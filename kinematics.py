@@ -26,7 +26,7 @@ def main(filename, model_name, show: bool = True, filename_output=None):
     # bounds = np.array([[-np.pi] * model.nbQ(), [np.pi] * model.nbQ()])
     IK = biorbd.InverseKinematics(model, markers_no_nan)
     # IK.bounds = bounds
-    q_recons = IK.solve(method="trf")
+    q_recons = IK.solve(method="trf")# TODO : Update biorbd and try proxqp new method to go faster. 
     sol = IK.sol()
     ## Export all kinematics in a csv file
     # find all the keys of dict_dof

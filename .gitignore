@@ -1,5 +1,6 @@
 /data
-/figures
-/Kinematics
+/figures*/
+/Kinematics*/
 /old
 *.pyc
+*.parquet

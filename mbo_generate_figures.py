@@ -4,23 +4,6 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 import math
 
-# ---------------------------------------------------------------------
-# PATHS
-# ---------------------------------------------------------------------
-base_folder = Path("Kinematics")
-
-model_to_analyze = "with_2dof_hand"
-
-folder_MB = base_folder / "Marker_based" / model_to_analyze
-folder_ML_SynthRTM = base_folder / "SynthRTMpose" / model_to_analyze
-folder_ML_Synthpose = base_folder / "Synthpose" / model_to_analyze
-# folder_fake_ML = base_folder / "test" / model_to_analyze / "fake_markerless"
-
-# Figures output folder
-figure_root = Path("./figures")
-figure_root.mkdir(exist_ok=True)
-
-NON_ANGLE_VARIABLES = ["TimeFrame", "TimeFrame(s)", "time", "frame", "timestamp"]
 
 
 # ---------------------------------------------------------------------
@@ -183,63 +166,94 @@ def generate_task_figure(subject_name, task_name, aligned_data):
     print(f"   ✔ Saved figure: {filepath}")
 
 
-# ---------------------------------------------------------------------
-# MAIN LOOP: GENERATE CSV + FIGURES
-# ---------------------------------------------------------------------
-comparison_rows = []
+if __name__ == "__main__":
+    # ---------------------------------------------------------------------
+    # PATHS
+    # ---------------------------------------------------------------------
+    base_folder = Path("figures") / "kinematics"
 
-for subject in folder_MB.iterdir():
-    if not subject.is_dir():
-        continue
+    model_to_analyze = "with_2dof_hand"
 
-    subject_name = subject.name
-    print(f"\n=== Processing subject: {subject_name} ===")
+    folder_MB = base_folder / "Marker_based" / model_to_analyze
+    folder_ML_SynthRTM = base_folder / "SynthRTMpose" / model_to_analyze
+    folder_ML_Synthpose = base_folder / "Synthpose" / model_to_analyze
+    folder_ML_RTM = base_folder / "Rtmpose" / model_to_analyze
+    # folder_fake_ML = base_folder / "test" / model_to_analyze / "fake_markerless"
 
-    ml_subject_folder = folder_ML_Synthpose / subject_name
-    if not ml_subject_folder.exists():
-        print(f"❌ No markerless data for {subject_name}")
-        continue
+    # Figures output folder
+    figure_root = Path("./figures_SB_2026_all") / model_to_analyze
+    #check if the folder exists, if not create it
+    if not figure_root.exists():
+        figure_root.mkdir(parents=True, exist_ok=True)
+    
 
-    ml_Synthpose_csv = get_csv_dict(ml_subject_folder)
-    mb_csv = get_csv_dict(subject)
-    ml_SynthRTM_csv = get_csv_dict(folder_ML_SynthRTM / subject_name)
+    NON_ANGLE_VARIABLES = ["TimeFrame", "TimeFrame(s)", "time", "frame", "timestamp"]
 
-    common_csv = set(ml_Synthpose_csv.keys()) & set(mb_csv.keys())
-    common_csv = set(ml_Synthpose_csv.keys()) & set(mb_csv.keys()) & set(ml_SynthRTM_csv.keys())
+    # ---------------------------------------------------------------------
+    # MAIN LOOP: GENERATE CSV + FIGURES
+    # ---------------------------------------------------------------------
+    comparison_rows = []
 
-    for csv_name in common_csv:
-        df_ml_Synthpose = ml_Synthpose_csv[csv_name]
-        df_mb = mb_csv[csv_name]
-        df_ml_SynthRTM = ml_SynthRTM_csv[csv_name]
+    for subject in folder_MB.iterdir():
+        if not subject.is_dir():
+            continue
 
-        # Report frames
-        n_ml = len(df_ml_Synthpose)
-        n_mb = len(df_mb)
-        ratio = n_mb / n_ml if n_ml > 0 else np.nan
+        subject_name = subject.name
+        print(f"\n=== Processing subject: {subject_name} ===")
 
-        print(f"\n➡ {subject_name} – {csv_name}")
-        print(f"   Markerless frames     = {n_ml}")
-        print(f"   Marker-based frames   = {n_mb}")
-        print(f"   Detected freq ratio   = {ratio:.2f}")
+        ml_subject_folder = folder_ML_Synthpose / subject_name
+        if not ml_subject_folder.exists():
+            print(f"❌ No markerless data for {subject_name}")
+            continue
 
         aligned_data = {
             "MarkerBased": df_mb,
            "Markerless_SynthRTM": df_ml_SynthRTM,
            "Markerless_Synthpose": df_ml_Synthpose,
         }
+        ml_Synthpose_csv = get_csv_dict(ml_subject_folder)
+        mb_csv = get_csv_dict(subject)
+        ml_SynthRTM_csv = get_csv_dict(folder_ML_SynthRTM / subject_name)
+        ml_RTM_csv = get_csv_dict(folder_ML_RTM / subject_name)
 
-        # -------------------------
-        # GENERATE FULL FIGURE
-        # -------------------------
-        task_name = csv_name.replace(".csv", "")
+        common_csv = set(ml_Synthpose_csv.keys()) & set(mb_csv.keys())
+        common_csv = set(ml_Synthpose_csv.keys()) & set(mb_csv.keys()) & set(ml_SynthRTM_csv.keys()) & set(ml_RTM_csv.keys())
 
-        generate_task_figure(subject_name, task_name, aligned_data)
+        for csv_name in common_csv:
+            df_ml_Synthpose = ml_Synthpose_csv[csv_name]
+            df_mb = mb_csv[csv_name]
+            df_ml_SynthRTM = ml_SynthRTM_csv[csv_name]
+            df_ml_RTM = ml_RTM_csv[csv_name]
 
-# # ---------------------------------------------------------------------
-# # FINAL CSV
-# # ---------------------------------------------------------------------
-# comparison_df = pd.DataFrame(comparison_rows)
-# comparison_df.to_csv(f"comparison_dataset_{model_to_analyze}.csv", index=False)
+            # Report frames
+            n_ml = len(df_ml_Synthpose)
+            n_mb = len(df_mb)
+            ratio = n_mb / n_ml if n_ml > 0 else np.nan
 
-# print(f"\n=== comparison_dataset_{model_to_analyze}.csv generated successfully ===")
-# print(f"=== All figures generated in ./figures/{model_to_analyze}/<subject>/task.png ===")
+            print(f"\n➡ {subject_name} – {csv_name}")
+            print(f"   Markerless frames     = {n_ml}")
+            print(f"   Marker-based frames   = {n_mb}")
+            print(f"   Detected freq ratio   = {ratio:.2f}")
+
+            aligned_data = {
+                "Markerless_Synthpose": df_ml_Synthpose,
+                "MarkerBased": df_mb,
+                "Markerless_SynthRTM": df_ml_SynthRTM,
+                "Markerless_RTM": df_ml_RTM,
+            }
+
+            # -------------------------
+            # GENERATE FULL FIGURE
+            # -------------------------
+            task_name = csv_name.replace(".csv", "")
+
+            generate_task_figure(subject_name, task_name, aligned_data)
+
+    # # ---------------------------------------------------------------------
+    # # FINAL CSV
+    # # ---------------------------------------------------------------------
+    # comparison_df = pd.DataFrame(comparison_rows)
+    # comparison_df.to_csv(f"comparison_dataset_{model_to_analyze}.csv", index=False)
+
+    # print(f"\n=== comparison_dataset_{model_to_analyze}.csv generated successfully ===")
+    # print(f"=== All figures generated in ./figures/{model_to_analyze}/<subject>/task.png ===")
