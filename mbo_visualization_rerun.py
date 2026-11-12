@@ -46,13 +46,10 @@ def visualize(npy_file):
     )
 
     viz.rerun()
-<<<<<<< HEAD
     input("Press Enter to close the viewer and exit...")
-=======
     pause = input("Press Enter to exit...")
     print(pause)
 
->>>>>>> upstream/main
 
 if __name__ == "__main__":
 
