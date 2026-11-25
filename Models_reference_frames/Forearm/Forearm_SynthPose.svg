@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 500" width="740" height="500">
+  <defs>
+    <style>
+      .body { fill: #f1f5f9; stroke: #1e293b; stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
+      .pt-cross { stroke: #0f172a; stroke-width: 2; stroke-linecap: round; }
+      .pt-lbl { font-family: Arial, sans-serif; font-size: 12px; font-weight: bold; fill: #0f172a; }
+      .note-lbl { font-family: Arial, sans-serif; font-size: 12px; font-weight: bold; fill: #334155; }
+      .ax-lbl { font-family: Arial, sans-serif; font-size: 13px; font-weight: bold; }
+      .title { font-family: Arial, sans-serif; font-size: 15px; font-weight: bold; fill: #0f172a; }
+      .subtitle { font-family: Arial, sans-serif; font-size: 13px; font-weight: bold; fill: #475569; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="740" height="500" fill="#ffffff" />
+  <text x="20" y="28" class="title">Forearm Reference Frame</text>
+  <text x="20" y="48" class="subtitle">SynthPose</text>
+
+  
+  <g id="anatomy">
+    <ellipse cx="262" cy="63" rx="22" ry="26" class="body" />
+    <path class="body" d="M 277 84 L 277 96 C 293 103, 313 108, 334 122 C 356 136, 364 158, 362 186 L 346 346 C 316 360, 208 360, 178 346 L 159 186 C 156 160, 162 140, 178 128 C 200 112, 228 104, 247 96 L 247 84 Z" />
+    <path class="body" d="M 178 128 C 158 138, 151 162, 156 192 L 162 252 L 188 250 L 186 182 C 188 158, 186 140, 178 128 Z" />
+    <path class="body" d="M 188 250 L 162 252 L 158 356 L 179 358 L 186 280 Z" />
+    <path class="body" d="M 179 358 L 158 356 L 155 382 L 154 412 C 154 417, 159 418, 160 412 L 161 392 L 163 422 C 163 427, 168 427, 169 422 L 169 394 L 172 420 C 173 425, 178 424, 178 419 L 176 394 L 181 412 C 183 416, 187 414, 186 409 L 182 386 Z" />
+  </g>
+
+  
+  <g id="anatomical-points">
+    <g transform="translate(162, 244)">
+      <line x1="-4.5" y1="0" x2="4.5" y2="0" class="pt-cross" />
+      <line x1="0" y1="-4.5" x2="0" y2="4.5" class="pt-cross" />
+    </g>
+    <text x="102" y="240" class="pt-lbl">r_lelbow</text>
+
+    <g transform="translate(188, 242)">
+      <line x1="-4.5" y1="0" x2="4.5" y2="0" class="pt-cross" />
+      <line x1="0" y1="-4.5" x2="0" y2="4.5" class="pt-cross" />
+    </g>
+    <text x="200" y="238" class="pt-lbl">r_melbow</text>
+
+    <g transform="translate(158, 356)">
+      <line x1="-4.5" y1="0" x2="4.5" y2="0" class="pt-cross" />
+      <line x1="0" y1="-4.5" x2="0" y2="4.5" class="pt-cross" />
+    </g>
+    <text x="98" y="360" class="pt-lbl">r_lwrist</text>
+
+    <g transform="translate(179, 358)">
+      <line x1="-4.5" y1="0" x2="4.5" y2="0" class="pt-cross" />
+      <line x1="0" y1="-4.5" x2="0" y2="4.5" class="pt-cross" />
+    </g>
+    <text x="192" y="376" class="pt-lbl">r_mwrist</text>
+  </g>
+
+  
+  <g id="definitions" transform="translate(395, 42)">
+    <text x="0" y="0" class="note-lbl">O = mid(r_lelbow, r_melbow)</text>
+    <text x="0" y="24" fill="#16a34a" class="note-lbl">Y : mid(r_lwrist, r_mwrist) → mid(r_lelbow, r_melbow)</text>
+    <text x="0" y="48" fill="#2563eb" class="note-lbl">Z : r_mwrist → r_lwrist</text>
+    <text x="0" y="72" fill="#dc2626" class="note-lbl">X = Y × Z</text>
+  </g>
+
+  
+  <g id="frame-forearm" transform="translate(175, 251)">
+    
+    <line x1="0" y1="0" x2="34" y2="26" stroke="#dc2626" stroke-width="2.5" />
+    <polygon points="30,18 41,32 24,27" fill="#dc2626" />
+    <text x="46" y="40" fill="#dc2626" class="ax-lbl">X</text>
+
+    
+    <line x1="0" y1="0" x2="0" y2="-64" stroke="#16a34a" stroke-width="2.5" />
+    <polygon points="-5,-64 0,-74 5,-64" fill="#16a34a" />
+    <text x="-5" y="-79" fill="#16a34a" class="ax-lbl">Y</text>
+
+    
+    <line x1="0" y1="0" x2="-68" y2="0" stroke="#2563eb" stroke-width="2.5" />
+    <polygon points="-68,-5 -78,0 -68,5" fill="#2563eb" />
+    <text x="-94" y="5" fill="#2563eb" class="ax-lbl">Z</text>
+
+    <circle cx="0" cy="0" r="3.5" fill="#0f172a" />
+    <text x="-8" y="20" class="pt-lbl">O</text>
+  </g>
+</svg>

@@ -1141,15 +1141,15 @@ def rtmpose(
                     dof_names=["R_Shoulder_AddAbd","R_Shoulder_FleExt","R_Shoulder_Rot"],
                     segment_coordinate_system=SegmentCoordinateSystem(
                         origin="R_Shoulder",
-                        first_axis=Axis(name=Axis.Name.Y, start="R_Elbow", end="R_Shoulder"),
-                        second_axis=Axis(name=Axis.Name.X, start="R_Elbow", end="R_Wrist"),
+                        first_axis=Axis(name=Axis.Name.Y, start="R_elbow", end="R_Shoulder"),
+                        second_axis=Axis(name=Axis.Name.X, start="R_elbow", end="R_wrist"),
                         axis_to_keep=Axis.Name.Y,
                     ),
-                    mesh=Mesh(("R_Shoulder", "R_Elbow"), is_local=False),
+                    mesh=Mesh(("R_Shoulder", "R_elbow"), is_local=False),
                 )
             )
             reduced_model.segments["R_Humerus"].add_marker(Marker("R_Shoulder", is_technical=True, is_anatomical=True))
-            reduced_model.segments["R_Humerus"].add_marker(Marker("R_Elbow", is_technical=True, is_anatomical=True))
+            reduced_model.segments["R_Humerus"].add_marker(Marker("R_elbow", is_technical=True, is_anatomical=True))
         else:
             reduced_model.add_segment(
                 Segment(
@@ -1159,11 +1159,11 @@ def rtmpose(
                     dof_names=["R_Shoulder_AddAbd"],
                     segment_coordinate_system=SegmentCoordinateSystem(
                         origin="R_Shoulder",
-                        first_axis=Axis(name=Axis.Name.Y, start="R_Elbow", end="R_Shoulder"),
-                        second_axis=Axis(name=Axis.Name.X, start="R_Elbow", end="R_Wrist"),
+                        first_axis=Axis(name=Axis.Name.Y, start="R_elbow", end="R_Shoulder"),
+                        second_axis=Axis(name=Axis.Name.X, start="R_elbow", end="R_wrist"),
                         axis_to_keep=Axis.Name.Y,
                     ),
-                    mesh=Mesh(("R_Shoulder", "R_Elbow"), is_local=False),
+                    mesh=Mesh(("R_Shoulder", "R_elbow"), is_local=False),
                 )
             )
 
@@ -1175,11 +1175,11 @@ def rtmpose(
                     dof_names=["R_Shoulder_FleExt"],
                     segment_coordinate_system=SegmentCoordinateSystem(
                         origin="R_Shoulder",
-                        first_axis=Axis(name=Axis.Name.Y, start="R_Elbow", end="R_Shoulder"),
-                        second_axis=Axis(name=Axis.Name.X, start="R_Elbow", end="R_Wrist"),
+                        first_axis=Axis(name=Axis.Name.Y, start="R_elbow", end="R_Shoulder"),
+                        second_axis=Axis(name=Axis.Name.X, start="R_elbow", end="R_wrist"),
                         axis_to_keep=Axis.Name.Y,
                     ),
-                    mesh=Mesh(("R_Shoulder", "R_Elbow"), is_local=False),
+                    mesh=Mesh(("R_Shoulder", "R_elbow"), is_local=False),
                 )
             )
             reduced_model.add_segment(
@@ -1190,15 +1190,15 @@ def rtmpose(
                     dof_names=["R_Shoulder_Rot"],
                     segment_coordinate_system=SegmentCoordinateSystem(
                         origin="R_Shoulder",
-                        first_axis=Axis(name=Axis.Name.Y, start="R_Elbow", end="R_Shoulder"),
-                        second_axis=Axis(name=Axis.Name.X, start="R_Elbow", end="R_Wrist"),
+                        first_axis=Axis(name=Axis.Name.Y, start="R_elbow", end="R_Shoulder"),
+                        second_axis=Axis(name=Axis.Name.X, start="R_elbow", end="R_wrist"),
                         axis_to_keep=Axis.Name.Y,
                     ),
-                    mesh=Mesh(("R_Shoulder", "R_Elbow"), is_local=False),
+                    mesh=Mesh(("R_Shoulder", "R_elbow"), is_local=False),
                 )
             )
             reduced_model.segments["R_Humerus_3"].add_marker(Marker("R_Shoulder", is_technical=True, is_anatomical=True))
-            reduced_model.segments["R_Humerus_3"].add_marker(Marker("R_Elbow", is_technical=True, is_anatomical=True))
+            reduced_model.segments["R_Humerus_3"].add_marker(Marker("R_elbow", is_technical=True, is_anatomical=True))
 
         if humerus_as_one_segment:
             parent_name_Rhum = "R_Humerus"
@@ -1211,12 +1211,12 @@ def rtmpose(
                 rotations=Rotations.Z,
                 dof_names=["R_Elbow_FleExt"],
                 segment_coordinate_system=SegmentCoordinateSystem(
-                    origin="R_Elbow",
-                    first_axis=Axis(name=Axis.Name.Y, start="R_Wrist", end="R_Elbow"),
-                    second_axis=Axis(name=Axis.Name.X, start="R_Elbow", end="R_Shoulder"),
+                    origin="R_elbow",
+                    first_axis=Axis(name=Axis.Name.Y, start="R_wrist", end="R_elbow"),
+                    second_axis=Axis(name=Axis.Name.X, start="R_elbow", end="R_Shoulder"),
                     axis_to_keep=Axis.Name.Y,
                 ),
-                mesh=Mesh(("R_Wrist", "R_Elbow"), is_local=False),
+                mesh=Mesh(("R_wrist", "R_elbow"), is_local=False),
             )
         )
         # reduced_model.segments["Forearm"].add_marker(Marker("R_wrist", is_technical=True, is_anatomical=True))
@@ -1228,15 +1228,15 @@ def rtmpose(
                 rotations=Rotations.Y,
                 dof_names=["R_Forearm_ProSup"],
                 segment_coordinate_system=SegmentCoordinateSystem(
-                    origin="R_Elbow",
-                    first_axis=Axis(name=Axis.Name.Y, start="R_Wrist", end="R_Elbow"),
-                    second_axis=Axis(name=Axis.Name.X, start="R_Elbow", end="R_Shoulder"),
+                    origin="R_elbow",
+                    first_axis=Axis(name=Axis.Name.Y, start="R_wrist", end="R_elbow"),
+                    second_axis=Axis(name=Axis.Name.X, start="R_elbow", end="R_Shoulder"),
                     axis_to_keep=Axis.Name.Y,
                 ),
-                mesh=Mesh(("R_Wrist", "R_Elbow"), is_local=False),
+                mesh=Mesh(("R_wrist", "R_elbow"), is_local=False),
             )
         )
-        reduced_model.segments["R_Forearm_2"].add_marker(Marker("R_Wrist", is_technical=True, is_anatomical=True))
+        reduced_model.segments["R_Forearm_2"].add_marker(Marker("R_wrist", is_technical=True, is_anatomical=True))
 
         if two_dof_hand_model:
             rotation_hand = Rotations.ZX
@@ -1252,16 +1252,16 @@ def rtmpose(
                 rotations=rotation_hand,
                 dof_names=dof_names_hand,
                 segment_coordinate_system=SegmentCoordinateSystem(
-                    origin="R_Wrist",
+                    origin="R_wrist",
                     first_axis=Axis(
                         name=Axis.Name.Y,
                         start=SegmentCoordinateSystemUtils.mean_markers(["R_MCP_index", "R_MCP_little"]),
-                        end="R_Wrist",
+                        end="R_wrist",
                     ),
                     second_axis=Axis(name=Axis.Name.Z, start="R_MCP_little", end="R_MCP_index"),
                     axis_to_keep=Axis.Name.Y,
                 ),
-                mesh=Mesh(("R_Wrist", "R_MCP_index", "R_MCP_little"), is_local=False),
+                mesh=Mesh(("R_wrist", "R_MCP_index", "R_MCP_little"), is_local=False),
             )
         )
         reduced_model.segments["R_Hand"].add_marker(Marker("R_MCP_index", is_technical=True, is_anatomical=True))
@@ -1279,14 +1279,14 @@ def rtmpose(
                     segment_coordinate_system=SegmentCoordinateSystem(
                         origin="L_Shoulder",
                         first_axis=Axis(name=Axis.Name.Y, start="L_Elbow", end="L_Shoulder"),
-                        second_axis=Axis(name=Axis.Name.X, start="L_Elbow", end="L_Wrist"),
+                        second_axis=Axis(name=Axis.Name.X, start="L_Elbow", end="L_wrist"),
                         axis_to_keep=Axis.Name.Y,
                     ),
                     mesh=Mesh(("L_Shoulder", "L_Elbow"), is_local=False),
                 )
             )
             reduced_model.segments["L_Humerus"].add_marker(Marker("L_Shoulder", is_technical=True, is_anatomical=True))
-            reduced_model.segments["L_Humerus"].add_marker(Marker("L_Elbow", is_technical=True, is_anatomical=True))
+            reduced_model.segments["L_Humerus"].add_marker(Marker("L_elbow", is_technical=True, is_anatomical=True))
         else:
             reduced_model.add_segment(
                 Segment(
@@ -1296,11 +1296,11 @@ def rtmpose(
                     dof_names=["L_Shoulder_AddAbd"],
                     segment_coordinate_system=SegmentCoordinateSystem(
                         origin="L_Shoulder",
-                        first_axis=Axis(name=Axis.Name.Y, start="L_Elbow", end="L_Shoulder"),
-                        second_axis=Axis(name=Axis.Name.X, start="L_Elbow", end="L_Wrist"),
+                        first_axis=Axis(name=Axis.Name.Y, start="L_elbow", end="L_Shoulder"),
+                        second_axis=Axis(name=Axis.Name.X, start="L_elbow", end="L_wrist"),
                         axis_to_keep=Axis.Name.Y,
                     ),
-                    mesh=Mesh(("L_Shoulder", "L_Elbow"), is_local=False),
+                    mesh=Mesh(("L_Shoulder", "L_elbow"), is_local=False),
                 )
             )
 
@@ -1312,11 +1312,11 @@ def rtmpose(
                     dof_names=["L_Shoulder_FleExt"],
                     segment_coordinate_system=SegmentCoordinateSystem(
                         origin="L_Shoulder",
-                        first_axis=Axis(name=Axis.Name.Y, start="L_Elbow", end="L_Shoulder"),
-                        second_axis=Axis(name=Axis.Name.X, start="L_Elbow", end="L_Wrist"),
+                        first_axis=Axis(name=Axis.Name.Y, start="L_elbow", end="L_Shoulder"),
+                        second_axis=Axis(name=Axis.Name.X, start="L_elbow", end="L_wrist"),
                         axis_to_keep=Axis.Name.Y,
                     ),
-                    mesh=Mesh(("L_Shoulder", "L_Elbow"), is_local=False),
+                    mesh=Mesh(("L_Shoulder", "L_elbow"), is_local=False),
                 )
             )
             reduced_model.add_segment(
@@ -1327,15 +1327,15 @@ def rtmpose(
                     dof_names=["L_Shoulder_Rot"],
                     segment_coordinate_system=SegmentCoordinateSystem(
                         origin="L_Shoulder",
-                        first_axis=Axis(name=Axis.Name.Y, start="L_Elbow", end="L_Shoulder"),
-                        second_axis=Axis(name=Axis.Name.X, start="L_Elbow", end="L_Wrist"),
+                        first_axis=Axis(name=Axis.Name.Y, start="L_elbow", end="L_Shoulder"),
+                        second_axis=Axis(name=Axis.Name.X, start="L_elbow", end="L_wrist"),
                         axis_to_keep=Axis.Name.Y,
                     ),
-                    mesh=Mesh(("L_Shoulder", "L_Elbow"), is_local=False),
+                    mesh=Mesh(("L_Shoulder", "L_elbow"), is_local=False),
                 )
             )
             reduced_model.segments["L_Humerus_3"].add_marker(Marker("L_Shoulder", is_technical=True, is_anatomical=True))
-            reduced_model.segments["L_Humerus_3"].add_marker(Marker("L_Elbow", is_technical=True, is_anatomical=True))
+            reduced_model.segments["L_Humerus_3"].add_marker(Marker("L_elbow", is_technical=True, is_anatomical=True))
 
         if humerus_as_one_segment:
             parent_name_Lhum = "L_Humerus"
@@ -1348,12 +1348,12 @@ def rtmpose(
                 rotations=Rotations.Z,
                 dof_names=["L_Elbow_FleExt"],
                 segment_coordinate_system=SegmentCoordinateSystem(
-                    origin="L_Elbow",
-                    first_axis=Axis(name=Axis.Name.Y, start="L_Wrist", end="L_Elbow"),
-                    second_axis=Axis(name=Axis.Name.X, start="L_Elbow", end="L_Shoulder"),
+                    origin="L_elbow",
+                    first_axis=Axis(name=Axis.Name.Y, start="L_wrist", end="L_elbow"),
+                    second_axis=Axis(name=Axis.Name.X, start="L_elbow", end="L_Shoulder"),
                     axis_to_keep=Axis.Name.Y,
                 ),
-                mesh=Mesh(("L_Shoulder", "L_Elbow"), is_local=False),
+                mesh=Mesh(("L_Shoulder", "L_elbow"), is_local=False),
             )
         )
         # reduced_model.segments["Forearm"].add_marker(Marker("R_wrist", is_technical=True, is_anatomical=True))
@@ -1365,15 +1365,15 @@ def rtmpose(
                 rotations=Rotations.Y,
                 dof_names=["L_Forearm_ProSup"],
                 segment_coordinate_system=SegmentCoordinateSystem(
-                    origin="L_Elbow",
-                    first_axis=Axis(name=Axis.Name.Y, start="L_Wrist", end="L_Elbow"),
-                    second_axis=Axis(name=Axis.Name.X, start="L_Elbow", end="L_Shoulder"),
+                    origin="L_elbow",
+                    first_axis=Axis(name=Axis.Name.Y, start="L_wrist", end="L_elbow"),
+                    second_axis=Axis(name=Axis.Name.X, start="L_elbow", end="L_Shoulder"),
                     axis_to_keep=Axis.Name.Y,
                 ),
-                mesh=Mesh(("L_Wrist", "L_Elbow"), is_local=False),
+                mesh=Mesh(("L_wrist", "L_elbow"), is_local=False),
             )
         )
-        reduced_model.segments["L_Forearm_2"].add_marker(Marker("L_Wrist", is_technical=True, is_anatomical=True))
+        reduced_model.segments["L_Forearm_2"].add_marker(Marker("L_wrist", is_technical=True, is_anatomical=True))
 
         if two_dof_hand_model:
             rotation_hand = Rotations.ZX

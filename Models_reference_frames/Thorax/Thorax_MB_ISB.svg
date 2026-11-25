@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 480" width="620" height="480">
+  <defs>
+    <style>
+      .body { fill: #f1f5f9; stroke: #1e293b; stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
+      .anat-line { fill: none; stroke: none; }
+      .sub-line { fill: none; stroke: none; }
+      .pt-cross { stroke: #0f172a; stroke-width: 2; stroke-linecap: round; }
+      .pt-lbl { font-family: Arial, sans-serif; font-size: 12px; font-weight: bold; fill: #0f172a; }
+      .note-lbl { font-family: Arial, sans-serif; font-size: 12px; font-weight: bold; fill: #334155; }
+      .ax-lbl { font-family: Arial, sans-serif; font-size: 13px; font-weight: bold; }
+      .title { font-family: Arial, sans-serif; font-size: 15px; font-weight: bold; fill: #0f172a; }
+      .subtitle { font-family: Arial, sans-serif; font-size: 13px; font-weight: bold; fill: #475569; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="620" height="480" fill="#ffffff" />
+  <text x="20" y="28" class="title">Thorax Reference Frame</text>
+  <text x="20" y="48" class="subtitle">MB-ISB</text>
+
+  
+  <g id="anatomy">
+    
+    <ellipse cx="242" cy="63" rx="22" ry="26" class="body" />
+    
+    <path class="body" d="M 227 84 L 227 96 C 211 103, 191 108, 170 122 C 148 136, 140 158, 142 186 L 158 346 C 188 360, 296 360, 326 346 L 345 186 C 348 160, 342 140, 326 128 C 304 112, 276 104, 257 96 L 257 84 Z" />
+
+    
+    <path class="body" d="M 326 128 C 346 138, 353 162, 348 192 L 342 252 L 316 250 L 318 182 C 316 158, 318 140, 326 128 Z" />
+    <path class="body" d="M 316 250 L 342 252 L 346 356 L 325 358 L 318 280 Z" />
+    <path class="body" d="M 325 358 L 346 356 L 349 382 L 350 412 C 350 417, 345 418, 344 412 L 343 392 L 341 422 C 341 427, 336 427, 335 422 L 335 394 L 332 420 C 331 425, 326 424, 326 419 L 328 394 L 323 412 C 321 416, 317 414, 318 409 L 322 386 Z" />
+  </g>
+
+  
+  <g id="anatomical-points">
+    
+    <g transform="translate(232, 105)">
+      <line x1="-4.5" y1="0" x2="4.5" y2="0" class="pt-cross" />
+      <line x1="0" y1="-4.5" x2="0" y2="4.5" class="pt-cross" />
+    </g>
+    <text x="198" y="98" class="pt-lbl">C7</text>
+
+    
+    <g transform="translate(246, 148)">
+      <line x1="-4.5" y1="0" x2="4.5" y2="0" class="pt-cross" />
+      <line x1="0" y1="-4.5" x2="0" y2="4.5" class="pt-cross" />
+    </g>
+    <text x="256" y="152" class="pt-lbl">IJ</text>
+
+    
+    <g transform="translate(242, 312)">
+      <line x1="-4.5" y1="0" x2="4.5" y2="0" class="pt-cross" />
+      <line x1="0" y1="-4.5" x2="0" y2="4.5" class="pt-cross" />
+    </g>
+    <text x="208" y="317" class="pt-lbl">T10</text>
+
+    
+    <g transform="translate(252, 282)">
+      <line x1="-4.5" y1="0" x2="4.5" y2="0" class="pt-cross" />
+      <line x1="0" y1="-4.5" x2="0" y2="4.5" class="pt-cross" />
+    </g>
+    <text x="262" y="286" class="pt-lbl">PX</text>
+  </g>
+
+  
+  <g id="definitions" transform="translate(382, 72)">
+    <text x="0" y="0" class="note-lbl">O = mean(IJ, C7, T10, PX)</text>
+    <text x="0" y="26" fill="#16a34a" class="note-lbl">Y : mid(PX, T10) → mid(C7, IJ)</text>
+    <text x="0" y="52" fill="#2563eb" class="note-lbl">Z : ⊥ (C7 → IJ)</text>
+    <text x="0" y="78" fill="#dc2626" class="note-lbl">X = Y × Z</text>
+  </g>
+
+  
+  <g id="frame-thorax" transform="translate(238, 215)">
+    
+    <line x1="0" y1="0" x2="-36" y2="28" stroke="#dc2626" stroke-width="2.5" />
+    <polygon points="-32,20 -43,34 -26,29" fill="#dc2626" />
+    <text x="-58" y="42" fill="#dc2626" class="ax-lbl">X</text>
+
+    
+    <line x1="0" y1="0" x2="-6" y2="-74" stroke="#16a34a" stroke-width="2.5" />
+    <polygon points="-11,-73 -6,-84 -1,-73" fill="#16a34a" />
+    <text x="-12" y="-89" fill="#16a34a" class="ax-lbl">Y</text>
+
+    
+    <line x1="0" y1="0" x2="86" y2="0" stroke="#2563eb" stroke-width="2.5" />
+    <polygon points="86,-5 96,0 86,5" fill="#2563eb" />
+    <text x="100" y="5" fill="#2563eb" class="ax-lbl">Z</text>
+
+    
+    <circle cx="0" cy="0" r="3.5" fill="#0f172a" />
+    <text x="9" y="-6" class="pt-lbl">O</text>
+  </g>
+</svg>

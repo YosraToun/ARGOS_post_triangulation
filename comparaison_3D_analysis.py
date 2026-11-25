@@ -219,7 +219,7 @@ def plot_error_quantiles(
 
 
 if __name__ == "__main__":
-    path_to_data = Path(r".\data\pre_processed\absolute_position_errors.parquet")
+    path_to_data = Path(r".\results\linear_kinematics\ml_keypoints_position_errors.parquet")
 
     df = pl.read_parquet(path_to_data)
     # list unique tasks

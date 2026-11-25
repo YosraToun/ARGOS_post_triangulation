@@ -148,12 +148,14 @@ if __name__ == "__main__":
     base_save_folder = Path(r".\Kinematics_SB2026_all")  # Adjust this path as needed
     two_dof_hand_model = True  # Set to True if you want to model the hand with 2 DOF (flexion/extension + deviation), False for 1 DOF (flexion/extension only)
     humerus_as_one_segment = True  # Set to True if you want to model the humerus as one segment, False for three segments
-    static_filename = "04-take-in-box.c3d"  # Adjust if your static file has a different name
+    static_filename = "00-static-stand.c3d"  # Adjust if your static file has a different name
 
     list_subjects_to_process = None # ["S08", "S09", "S10"]  # Example: Only process subjects S08, S09, and S10
     list_tasks_to_process = None# Example: Only process these specific tasks
     side_to_process = "both"  # Options: string containing "left", "right", or "both" to process left, right, or both sides respectively
-    # Synthpose ==> ici j'utilise aussi les données de Synthpose pour le thorax et rtm pour le reste
+    
+    # Synthpose ==> ici j'utilise aussi les données de Synthpose pour le thorax de RTM  
+    #  ET RTM pour le reste ( hand + humerus+ forearm)
     root_folder_RTMPOSE= Path(r".\data\pre_processed\marker_less\SynthRTMPose")
     folder_to_save_RTMPOSE = (
         base_save_folder / "Rtmpose" / "with_2dof_hand"
